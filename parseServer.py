@@ -14,15 +14,8 @@ from pyspark import SparkContext
 sc = SparkContext.getOrCreate()
 
 
-
-
-
-
 # SHOULD PROBABLY BE A FILESTREAM
 # f = open("/home/josh/Desktop/THESIS/DATA/CC-MAIN-20160524002110-00000-ip-10-185-217-139.ec2.internal.warc.wat")
-
-
-
 
 
 def getHeaders (id_, iterator):

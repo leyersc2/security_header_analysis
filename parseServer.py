@@ -3,6 +3,8 @@
 #   PURPOSE:    Establishing a function to parse JSON for the purpose of analyzing common crawl security headers.
 #               For testing purposes this file will utilize a local data file consisting of 100 lines of a WAT file.
 
+#edits to be made bi-weekly
+
 import json
 import boto
 from boto.s3.key import Key
@@ -16,6 +18,7 @@ sc = SparkContext.getOrCreate()
 
 # SHOULD PROBABLY BE A FILESTREAM
 # f = open("/home/josh/Desktop/THESIS/DATA/CC-MAIN-20160524002110-00000-ip-10-185-217-139.ec2.internal.warc.wat")
+
 
 
 def getHeaders (id_, iterator):
@@ -130,4 +133,4 @@ sumcount = headers.aggregateByKey((0,0,0,0,0,0,0,0,0,0),\
 print("DONE")
 
 for x in sumcount.collect():
-    print x              
+    print x

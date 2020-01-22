@@ -117,7 +117,7 @@ def getHeaders (id_, iterator):
             except UnboundLocalError:
                 continue
 
-#TEST COMMENT 
+#TEST COMMENT - IF YOU'RE READING THIS, NOLAN GET BACK TO WORK
 
 files = sc.textFile("testwat.paths")
 headers = files.mapPartitionsWithIndex(getHeaders) \

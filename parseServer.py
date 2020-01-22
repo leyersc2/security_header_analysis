@@ -117,19 +117,17 @@ def getHeaders (id_, iterator):
             except UnboundLocalError:
                 continue
 
-#TEST COMMENT - IF YOU'RE READING THIS, NOLAN GET BACK TO WORK
-
 files = sc.textFile("testwat.paths")
 headers = files.mapPartitionsWithIndex(getHeaders) \
     .map(lambda x: (x[0], (x[1], x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[9], x[10], x[11], x[12], x[13], x[14]))) \
     #.reduceByKey(lambda x, y: x + y)
 
-sumcount = headers.aggregateByKey((0,0,0,0,0,0),\
-    (lambda x, y: (x[0]+y[0],x[1]+y[1],x[2]+y[2], x[3]+y[3],x[4]+y[4],x[5]+y[5])),\
-    (lambda rdd1, rdd2: (rdd1[0]+rdd2[0], rdd1[1]+rdd2[1], rdd1[2]+rdd2[2], rdd1[3]+rdd2[3],rdd1[4]+rdd2[4],rdd1[5]+rdd2[5])))
+sumcount = headers.aggregateByKey((0,0,0,0,0,0,0,0,0,0),\
+    (lambda x, y: (x[0]+y[0],x[1]+y[1],x[2]+y[2], x[3]+y[3],x[4]+y[4],x[5]+y[5],x[6]+y[6],x[7]+y[7],x[8]+y[8],x[9]+y[9])),\
+    (lambda rdd1, rdd2: (rdd1[0]+rdd2[0], rdd1[1]+rdd2[1], rdd1[2]+rdd2[2], rdd1[3]+rdd2[3],rdd1[4]+rdd2[4],rdd1[5]+rdd2[5],rdd1[6]+rdd2[6],rdd1[7]+rdd2[7],rdd1[8]+rdd2[8],rdd1[9]+rdd2[9])))
 
 
 print("DONE")
 
 for x in sumcount.collect():
-    print x                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ~                         
+    print x              

@@ -54,54 +54,58 @@ def getHeaders (id_, iterator):
                 #     data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Referer", ""), \
                 #     data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Referer-Policy", "")
 
-                retArray = [None] * 15
+                retArray = [None] * 16
                 retArray[0] = data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Server", "")
-                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-XSS-Protection", "") != ""):
+                if(retArray[0] != ""):
                     retArray[1] = 1
                 else:
                     retArray[1] = 0
-                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Content-Security-Policy", "") != ""):
+                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-XSS-Protection", "") != ""):
                     retArray[2] = 1
                 else:
                     retArray[2] = 0
-                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Frame-Options", "") != ""):
+                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Content-Security-Policy", "") != ""):
                     retArray[3] = 1
                 else:
                     retArray[3] = 0
-                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Strict-Transport-Security", "")!= ""):
+                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Frame-Options", "") != ""):
                     retArray[4] = 1
                 else:
                     retArray[4] = 0
-                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Content-Type-Options", "")!= ""):
+                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Strict-Transport-Security", "")!= ""):
                     retArray[5] = 1
                 else:
                     retArray[5] = 0
-                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Download-Options", "")!= ""):
+                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Content-Type-Options", "")!= ""):
                     retArray[6] = 1
                 else:
                     retArray[6] = 0
-                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Permitted-Cross-Domain-Policies", "")!= ""):
+                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Download-Options", "")!= ""):
                     retArray[7] = 1
                 else:
                     retArray[7] = 0
-                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Public-Key-Pins", "")!= ""):
+                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Permitted-Cross-Domain-Policies", "")!= ""):
                     retArray[8] = 1
                 else:
                     retArray[8] = 0
-
-                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Content-Security-Policy", "")!= ""):
+                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Public-Key-Pins", "")!= ""):
                     retArray[9] = 1
                 else:
                     retArray[9] = 0
-                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Expect-CT", "")!= ""):
+
+                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Content-Security-Policy", "")!= ""):
                     retArray[10] = 1
                 else:
                     retArray[10] = 0
-                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Feature-Policy", "")!= ""):
+                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Expect-CT", "")!= ""):
                     retArray[11] = 1
                 else:
                     retArray[11] = 0
-                retArray[12] = data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Date", "")
+                if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Feature-Policy", "")!= ""):
+                    retArray[12] = 1
+                else:
+                    retArray[12] = 0
+                retArray[15] = data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Date", "")
                 if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Referer", "")!= ""):
                     retArray[13] = 1
                 else:
@@ -122,12 +126,12 @@ def getHeaders (id_, iterator):
 
 files = sc.textFile("testwat.paths")
 headers = files.mapPartitionsWithIndex(getHeaders) \
-    .map(lambda x: (x[0], (x[1], x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[9], x[10], x[11], x[12], x[13], x[14]))) \
+    .map(lambda x: (x[0], (x[1], x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[9], x[10], x[11], x[12], x[13], x[14],x[15]))) \
     #.reduceByKey(lambda x, y: x + y)
 
-sumcount = headers.aggregateByKey((0,0,0,0,0,0,0,0,0,0),\
-    (lambda x, y: (x[0]+y[0],x[1]+y[1],x[2]+y[2], x[3]+y[3],x[4]+y[4],x[5]+y[5],x[6]+y[6],x[7]+y[7],x[8]+y[8],x[9]+y[9])),\
-    (lambda rdd1, rdd2: (rdd1[0]+rdd2[0], rdd1[1]+rdd2[1], rdd1[2]+rdd2[2], rdd1[3]+rdd2[3],rdd1[4]+rdd2[4],rdd1[5]+rdd2[5],rdd1[6]+rdd2[6],rdd1[7]+rdd2[7],rdd1[8]+rdd2[8],rdd1[9]+rdd2[9])))
+sumcount = headers.aggregateByKey((0,0,0,0,0,0,0,0,0,0,0,0,0,0),\
+    (lambda x, y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4], x[5]+y[5], x[6]+y[6], x[7]+y[7], x[8]+y[8], x[9]+y[9], x[10]+y[10], x[11]+y[11],x[12]+y[12],x[13]+y[13])),\
+    (lambda rdd1, rdd2: (rdd1[0]+rdd2[0], rdd1[1]+rdd2[1], rdd1[2]+rdd2[2], rdd1[3]+rdd2[3],rdd1[4]+rdd2[4],rdd1[5]+rdd2[5],rdd1[6]+rdd2[6],rdd1[7]+rdd2[7],rdd1[8]+rdd2[8],rdd1[9]+rdd2[9], rdd1[10]+rdd2[10], rdd1[11]+rdd2[11], rdd1[12]+rdd2[12], rdd1[13]+rdd2[13])))
 
 
 print("DONE")

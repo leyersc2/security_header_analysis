@@ -130,7 +130,7 @@ headers = files.mapPartitionsWithIndex(getHeaders) \
     #.reduceByKey(lambda x, y: x + y)
 
 sumcount = headers.aggregateByKey((0,0,0,0,0,0,0,0,0,0,0,0,0,0),\
-    (lambda x, y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4], x[5]+y[5], x[6]+y[6], x[7]+y[7], x[8]+y[8], x[9]+y[9], x[10]+y[10], x[11]+y[11],x[12]+y[12],x[13]+y[13])),\
+    (lambda x, y: (x[0]+y[0], x[1]+y[1], x[2]+y[2], x[3]+y[3], x[4]+y[4], x[5]+y[5], x[6]+y[6], x[7]+y[7], x[8]+y[8], x[9]+y[9], x[10]+y[10], x[11]+y[11], x[12]+y[12], x[13]+y[13])),\
     (lambda rdd1, rdd2: (rdd1[0]+rdd2[0], rdd1[1]+rdd2[1], rdd1[2]+rdd2[2], rdd1[3]+rdd2[3],rdd1[4]+rdd2[4],rdd1[5]+rdd2[5],rdd1[6]+rdd2[6],rdd1[7]+rdd2[7],rdd1[8]+rdd2[8],rdd1[9]+rdd2[9], rdd1[10]+rdd2[10], rdd1[11]+rdd2[11], rdd1[12]+rdd2[12], rdd1[13]+rdd2[13])))
 
 

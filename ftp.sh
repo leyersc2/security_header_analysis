@@ -8,7 +8,7 @@ read server_info
 chmod 400 commonCrawl.pem
 
 echo "########### TRANSFERING SETUP FILES ###########"
-scp -i commonCrawl.pem Make.sh hadoop@ec2-$server_info.us-east-2.compute.amazonaws.com:/home
+scp -i commonCrawl.pem Make.sh hadoop@ec2-$server_info.us-east-2.compute.amazonaws.com:/home/hadoop
 
 
 echo "########### connecting to server and run commands in sequence ###########"

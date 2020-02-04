@@ -12,6 +12,7 @@ from boto.s3.connection import S3Connection
 from gzipstream import GzipStreamFile
 import warc
 from pyspark import SparkContext
+from urlparse import urlparse
 
 sc = SparkContext.getOrCreate()
 
@@ -55,7 +56,7 @@ def getHeaders (id_, iterator):
                 #     data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Referer-Policy", "")
 
                 retArray = [None] * 16
-                retArray[0] = data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Server", "")
+                retArray[0] = urlparse(data["Envelope"]["WARC-Header-Metadata"].get("WARC-Target-URI", "")).netloc
                 if(retArray[0] != ""):
                     retArray[1] = 1
                 else:
@@ -134,7 +135,10 @@ sumcount = headers.aggregateByKey((0,0,0,0,0,0,0,0,0,0,0,0,0,0),\
     (lambda rdd1, rdd2: (rdd1[0]+rdd2[0], rdd1[1]+rdd2[1], rdd1[2]+rdd2[2], rdd1[3]+rdd2[3],rdd1[4]+rdd2[4],rdd1[5]+rdd2[5],rdd1[6]+rdd2[6],rdd1[7]+rdd2[7],rdd1[8]+rdd2[8],rdd1[9]+rdd2[9], rdd1[10]+rdd2[10], rdd1[11]+rdd2[11], rdd1[12]+rdd2[12], rdd1[13]+rdd2[13])))
 
 
-print("DONE")
-
 for x in sumcount.collect():
-    print x
+        string = x[0]
+        for y in x[1]:
+                string = string + ","
+                if(y != 0):
+                        string = string + str(y)
+        print(string)

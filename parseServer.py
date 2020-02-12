@@ -38,22 +38,6 @@ def getHeaders (id_, iterator):
             try:
                 data = json.loads(line.payload.read())
 
-                # Possibly attempt to yield each header value instead of a dictionary, map should be forming the key-value pairs
-                # yield data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Server", ""), \
-                #     data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-XSS-Protection", ""), \
-                #     data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Content-Security-Policy", ""), \
-                #     data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Frame-Options", ""), \
-                #     data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Strict-Transport-Security", ""), \
-                #     data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Content-Type-Options", ""), \
-                #     data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Download-Options", ""), \
-                #     data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Permitted-Cross-Domain-Policies", ""), \
-                #     data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Public-Key-Pins", ""), \
-                #     data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Content-Security-Policy", ""), \
-                #     data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Expect-CT", ""), \
-                #     data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Feature-Policy", ""), \
-                #     data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Date", ""), \
-                #     data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Referer", ""), \
-                #     data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Referer-Policy", "")
 
                 retArray = [None] * 16
                 retArray[0] = urlparse(data["Envelope"]["WARC-Header-Metadata"].get("WARC-Target-URI", "")).netloc

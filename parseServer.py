@@ -40,7 +40,7 @@ def getHeaders (id_, iterator):
 
 
                 retArray = [None] * 16
-                retArray[0] = urlparse(data["Envelope"]["WARC-Header-Metadata"].get("WARC-Target-URI", "")).netloc
+                retArray[0] = urlparse(data["Envelope"]["WARC-Header-Metadata"].get("WARC-Target-URI", "")).hostname
                 if(retArray[0] != ""):
                     retArray[1] = 1
                 else:

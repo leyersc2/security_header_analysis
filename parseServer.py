@@ -20,7 +20,7 @@
     #  |
     #  |      CommonCrawl WARC Files (IN) -- Collection of WARC files
     #  |          containing raw HTML data from each crawled hosts
-
+    #  |
     #  |      CommonCrawl WAT Files (IN) -- Contains JSON formatted metadata
     #  |        containing components desired for analysis on unique hosts
     #  |

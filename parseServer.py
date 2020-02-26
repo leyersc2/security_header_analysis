@@ -10,10 +10,15 @@ import hashlib
 
 sc = SparkContext.getOrCreate()
 
-
-# SHOULD PROBABLY BE A FILESTREAM
-# f = open("/home/josh/Desktop/THESIS/DATA/CC-MAIN-20160524002110-00000-ip-10-185-217-139.ec2.internal.warc.wat")
-
+#------------------------ HEADER FLAGS --------------------------------------+
+#  Purpose: CREATE INTEGERS THAT, WHEN CONSIDERED TO BE BINARY
+#     STRINGS, CAN BE USED FOR BITWISE OPERATIONS FOR OPERATING
+#     ON A SINGLE HEADER
+#
+#  Parameters:  NONE
+#
+#  Result:  13 INTEGERS. ONE FOR EACH HEADER.
+#----------------------------------------------------------------------------+
 
 X_XSS_Protection_FLAG = 0b100000000000
 Content_Security_Policy_FLAG = 0b010000000000
@@ -45,6 +50,22 @@ def getHeaders (id_, iterator):
                 data = json.loads(line.payload.read())
 
 
+
+                #------------------------ BUILD DICTIONARY ------------------------------+
+                #  Purpose:   FOR EVERY RESPONSE RECORD IN THE CURRENT WAT FILE,
+                #     CODE BLOCK CREATES A DICTIONARY OBJECT retArray CONTAINING
+                #     TWO ELEMENTS:
+                #       -MD5 HASH OUTPUT OF HOSTNAME
+                #       -AN INTEGER, WHICH WHEN DISPLAYED IN BINARY HAS ONE BIT
+                #       REPRESENTATIVE OF THE PRESENCE OF EACH PARTICULAR HEADER
+                #     IF ANY EXCEPTIONS ARE THROWN, DISREGARD AND CONTINUE.
+                #
+                #  Parameters:
+                #     -HTTP RESPONSE SECURITY HEADERS FROM CURRENT WAT RECORD
+                #     -FLAG BIT VARIABLES REPRESENTATIVE OF EACH HEADER
+                #
+                #  Result:    DICTIONARY OBJECT REPRESENTING ONE WAT RECORD
+                #------------------------------------------------------------------------+
                 retArray = [None, 0b0000000000000]
                 if(data["Envelope"]["WARC-Header-Metadata"]["WARC-Type"] == "response"):
 
@@ -84,6 +105,18 @@ def getHeaders (id_, iterator):
             except UnboundLocalError:
                 continue
 
+#------------------------ MAPREDUCE AND OUTPUT ------------------------------+
+#  Purpose:   PERFORM MAPREDUCE ON DICTIONARY OBJECTS AND OUTPUT AS TBD
+#       -MAP STEP: CREATE KEY-VALUE PAIR FROM DICTIONARY ELEMENTS
+#       -REDUCE STEP: REDUCE RECORDS WHERE HOSTNAMES MATCH INTO
+#        SINGLE RECORD BY PERFORMING BITWISE-OR ON HEADER BITS
+#       -OUTPUT STEP: ¯\_(ツ)_/¯
+#
+#  Parameters:
+#     -files: FILE CONTAINING PATHS OF WAT FILES WITHIN S3 BUCKET
+#
+#  Result:    FINAL PRODUCT, WHATEVER THAT MAY BE
+#----------------------------------------------------------------------------+
 files = sc.textFile("testwat.paths")
 headers = files.mapPartitionsWithIndex(getHeaders) \
     .map(lambda x: (x[0], x[1])) \
@@ -94,5 +127,3 @@ for x in headers.take(1):
     print(x)
 for x in headers.take(1):
     print(x)
-
-

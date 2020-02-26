@@ -20,7 +20,7 @@
     #  |
     #  |      CommonCrawl WARC Files (IN) -- Collection of WARC files
     #  |          containing raw HTML data from each crawled hosts
-    #  |
+
     #  |      CommonCrawl WAT Files (IN) -- Contains JSON formatted metadata
     #  |        containing components desired for analysis on unique hosts
     #  |
@@ -73,9 +73,6 @@ import hashlib
 
 sc = SparkContext.getOrCreate()
 
-# SHOULD PROBABLY BE A FILESTREAM
-# f = open("/home/josh/Desktop/THESIS/DATA/CC-MAIN-20160524002110-00000-ip-10-185-217-139.ec2.internal.warc.wat")
-
 #------------------------ HEADER FLAGS --------------------------------------+
 #  Purpose: CREATE INTEGERS THAT, WHEN CONSIDERED TO BE BINARY
 #     STRINGS, CAN BE USED FOR BITWISE OPERATIONS FOR OPERATING
@@ -103,14 +100,12 @@ Referer_Policy_FLAG = 0b000000000001
 def getHeaders (id_, iterator):
 
     conn = S3Connection(host="s3.amazonaws.com")
-
     bucket = conn.get_bucket("commoncrawl")
 
     for uri in iterator:
         key_ = Key(bucket,uri)
         file_ = warc.WARCFile(fileobj = GzipStreamFile(key_))
 
-        # Loops through the entire WAT file, and grabs relevant headers, stores them in a dictionary where the key is the server, and the values are the headers ordered in a standardized way.
         for line in file_:
             try:
                 data = json.loads(line.payload.read())

@@ -76,6 +76,16 @@ sc = SparkContext.getOrCreate()
 # SHOULD PROBABLY BE A FILESTREAM
 # f = open("/home/josh/Desktop/THESIS/DATA/CC-MAIN-20160524002110-00000-ip-10-185-217-139.ec2.internal.warc.wat")
 
+#------------------------ HEADER FLAGS --------------------------------------+
+#  Purpose: CREATE INTEGERS THAT, WHEN CONSIDERED TO BE BINARY
+#     STRINGS, CAN BE USED FOR BITWISE OPERATIONS FOR OPERATING
+#     ON A SINGLE HEADER
+#
+#  Parameters:  NONE
+#
+#  Result:  13 INTEGERS. ONE FOR EACH HEADER.
+#----------------------------------------------------------------------------+
+
 X_XSS_Protection_FLAG = 0b100000000000
 Content_Security_Policy_FLAG = 0b010000000000
 X_Frame_Options_FLAG = 0b001000000000

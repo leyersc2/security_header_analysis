@@ -41,7 +41,7 @@
     #  |     track of data stored in S3.
     #  |
     #  |    boto.s3.connection -> S3Connection : Connect to local
-    #  |     Region’s endpoint. Returns a connection object pointing
+    #  |     Regions endpoint. Returns a connection object pointing
     #  |     to the endpoint associated with this region.
     #  |
     #  |    gzipstream -> GzipStreamFile : allows Python to process
@@ -171,7 +171,7 @@ def getHeaders (id_, iterator):
 #       -MAP STEP: CREATE KEY-VALUE PAIR FROM DICTIONARY ELEMENTS
 #       -REDUCE STEP: REDUCE RECORDS WHERE HOSTNAMES MATCH INTO
 #        SINGLE RECORD BY PERFORMING BITWISE-OR ON HEADER BITS
-#       -OUTPUT STEP: ¯\_(ツ)_/¯
+#       -OUTPUT STEP:
 #
 #  Parameters:
 #     -files: FILE CONTAINING PATHS OF WAT FILES WITHIN S3 BUCKET
@@ -183,8 +183,28 @@ headers = files.mapPartitionsWithIndex(getHeaders) \
     .map(lambda x: (x[0], x[1])) \
     .reduceByKey(lambda x, y: x | y)
 
-#print(headers.count())
-for x in headers.take(1):
+# zipped = headers.zipWithIndex()
+# first100 = zipped.filter()
+# print(zipped)
+
+# doesnt seem to filter anything :(
+# header = headers.take(10)
+# for x in header:
+#     print(x)
+#     headers.filter(lambda line: line != x)
+
+# header = headers.take(10)
+# for x in header:
+#     print(x)
+
+
+# headers.filter(lambda line: line != header)
+
+
+# print(headers.count())
+for x in headers.take(10):
+    print("FIRST\n")
     print(x)
-for x in headers.take(1):
+for x in headers.take(10):
+    print("SECOND\n")
     print(x)

@@ -183,6 +183,9 @@ headers = files.mapPartitionsWithIndex(getHeaders) \
     .map(lambda x: (x[0], x[1])) \
     .reduceByKey(lambda x, y: x | y)
 
+
+# parts = headers.partitions
+print(headers.getNumPartitions())
 # zipped = headers.zipWithIndex()
 # first100 = zipped.filter()
 # print(zipped)
@@ -202,9 +205,9 @@ headers = files.mapPartitionsWithIndex(getHeaders) \
 
 
 # print(headers.count())
-for x in headers.take(10):
-    print("FIRST\n")
-    print(x)
-for x in headers.take(10):
-    print("SECOND\n")
-    print(x)
+# for x in headers.take(10):
+#     print("FIRST\n")
+#     print(x)
+# for x in headers.take(10):
+#     print("SECOND\n")
+#     print(x)

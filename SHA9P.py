@@ -1,3 +1,6 @@
+    # stream name: thesis-stream
+    # bucket name: winthropcsthesis
+    
     # /*------------------------------------------------- parseServer.py -----
     #  |  program name: parseServer.py
     #  |
@@ -181,11 +184,13 @@ def getHeaders (id_, iterator):
 files = sc.textFile("testwat.paths")
 headers = files.mapPartitionsWithIndex(getHeaders) \
     .map(lambda x: (x[0], x[1])) \
-    .reduceByKey(lambda x, y: x | y)
+    .reduceByKey(lambda x, y: x | y) \
+    .partitionBy(3)
 
 
 # parts = headers.partitions
-print(headers.getNumPartitions())
+# print(headers.getNumPartitions())
+headers.saveAsTextFile("please3")
 # zipped = headers.zipWithIndex()
 # first100 = zipped.filter()
 # print(zipped)
@@ -197,7 +202,7 @@ print(headers.getNumPartitions())
 #     headers.filter(lambda line: line != x)
 
 # header = headers.take(10)
-# for x in header:
+# for x in headers.collect():
 #     print(x)
 
 

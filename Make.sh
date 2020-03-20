@@ -11,6 +11,7 @@ sudo pip install wheel
 sudo pip install aws-hadoop
 sudo pip install spark
 sudo pip install boto
+sudo pip install boto3
 sudo pip install warc
 sudo pip install pyspark
 sudo easy_install hashlib

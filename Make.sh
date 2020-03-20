@@ -8,6 +8,7 @@ echo "~GIT Repo Cloned~"
 
 
 sudo pip install wheel
+sudo pip install aws-hadoop
 sudo pip install spark
 sudo pip install boto
 sudo pip install warc

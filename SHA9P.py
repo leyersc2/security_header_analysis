@@ -73,6 +73,7 @@ import warc
 from pyspark import SparkContext
 from urlparse import urlparse
 import hashlib
+import boto3
 
 sc = SparkContext.getOrCreate()
 
@@ -99,6 +100,9 @@ Expect_CT_FLAG = 0b000000001000
 Feature_Policy_FLAG = 0b000000000100
 Referer_FLAG = 0b000000000010
 Referer_Policy_FLAG = 0b000000000001
+
+partitions = 3
+
 
 def getHeaders (id_, iterator):
 
@@ -185,12 +189,12 @@ files = sc.textFile("testwat.paths")
 headers = files.mapPartitionsWithIndex(getHeaders) \
     .map(lambda x: (x[0], x[1])) \
     .reduceByKey(lambda x, y: x | y) \
-    .partitionBy(3)
+    .partitionBy(partitions)
 
 
 # parts = headers.partitions
 # print(headers.getNumPartitions())
-headers.saveAsTextFile("please3")
+headers.saveAsTextFile("April2016-2")
 # zipped = headers.zipWithIndex()
 # first100 = zipped.filter()
 # print(zipped)
@@ -200,6 +204,17 @@ headers.saveAsTextFile("please3")
 # for x in header:
 #     print(x)
 #     headers.filter(lambda line: line != x)
+
+
+s3 = boto3.resource('s3')
+
+for x in range(0, partitions):
+    partname = 'April2016-2/part-'
+    num = format(x, '05d')
+    partname = partname + num
+    #print(repr(partname))
+    #print(repr("please3/part-00000"))
+    s3.meta.client.upload_file(partname, 'winthropcsthesis',partname + '.txt')
 
 # header = headers.take(10)
 # for x in headers.collect():

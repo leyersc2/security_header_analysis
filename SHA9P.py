@@ -62,6 +62,11 @@
     #  |
     #  |    hashlib : implements a common interface to many different
     #  |     secure hash and message digest algorithms.
+    #  |
+    #  |    boto3: latest version of  Amazon Web Services (AWS) SDK for Python.
+    #  |     It enables Python developers to create, configure, and manage
+    #  |     AWS services, such as EC2 and S3.
+    #  |    
     #  *-------------------------------------------------------------------*/
 
 import json

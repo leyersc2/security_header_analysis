@@ -81,6 +81,7 @@ import hashlib
 import boto3
 import os
 import os.path
+import shutil
 
 sc = SparkContext.getOrCreate()
 
@@ -112,7 +113,6 @@ Public_Key_Pins_Report_Only_FLAG =          0b000000000000001
 
 partitions = 2
 
-
 def getHeaders (id_, iterator):
 
     conn = S3Connection(host="s3.amazonaws.com")
@@ -125,8 +125,6 @@ def getHeaders (id_, iterator):
         for line in file_:
             try:
                 data = json.loads(line.payload.read())
-
-
 
                 #------------------------ BUILD DICTIONARY ------------------------------+
                 #  Purpose:   FOR EVERY RESPONSE RECORD IN THE CURRENT WAT FILE,
@@ -171,11 +169,11 @@ def getHeaders (id_, iterator):
                         retArray[1] = retArray[1] | Referrer_Policy_FLAG
                     if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Public-Key-Pins", "")!= ""):
                         retArray[1] = retArray[1] | X_Public_Key_Pins_FLAG
-                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Public-Key-Pins", "")!= ""):
+                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Public-Key-Pins-Report-Only", "")!= ""):
                         retArray[1] = retArray[1] | X_Public_Key_Pins_Report_Only_FLAG
-                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Public-Key-Pins", "")!= ""):
+                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Public-Key-Pins", "")!= ""):
                         retArray[1] = retArray[1] | Public_Key_Pins_FLAG
-                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Public-Key-Pins", "")!= ""):
+                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Public-Key-Pins-Report-Only", "")!= ""):
                         retArray[1] = retArray[1] | Public_Key_Pins_Report_Only_FLAG
                     yield retArray
 
@@ -198,58 +196,27 @@ def getHeaders (id_, iterator):
 #
 #  Result:    FINAL PRODUCT, WHATEVER THAT MAY BE
 #----------------------------------------------------------------------------+
-files = sc.textFile("testwat.paths")
-headers = files.mapPartitionsWithIndex(getHeaders) \
-    .map(lambda x: (x[0], x[1])) \
-    .reduceByKey(lambda x, y: x | y) \
-    .partitionBy(partitions)
+for yy in range(15, 21):
+    for mm in range(1, 13):
+        yymmstr = str(yy) + "-" + str(mm).zfill(2)
 
-month = "April2016"
+        files = sc.textFile("paths/" + yymmstr + "wat.paths")
+        headers = files.mapPartitionsWithIndex(getHeaders) \
+            .map(lambda x: (x[0], x[1])) \
+            .reduceByKey(lambda x, y: x | y) \
+            .partitionBy(partitions)
 
+        #month = "16-04"
 
-# parts = headers.partitions
-# print(headers.getNumPartitions())
-headers.saveAsTextFile(month)
-# zipped = headers.zipWithIndex()
-# first100 = zipped.filter()
-# print(zipped)
+        headers.saveAsTextFile(yymmstr)
 
-# doesnt seem to filter anything :(
-# header = headers.take(10)
-# for x in header:
-#     print(x)
-#     headers.filter(lambda line: line != x)
+        s3 = boto3.resource('s3')
 
+        for x in range(0, partitions):
+            partname = yymmstr + '/part-'
+            num = format(x, '05d')
+            partname = partname + num
 
-s3 = boto3.resource('s3')
+            s3.meta.client.upload_file(partname, 'winthropcsthesis',partname + '.txt')
 
-for x in range(0, partitions):
-    partname = month + '/part-'
-    num = format(x, '05d')
-    partname = partname + num
-
-        #print(repr(partname))
-        #print(repr("please3/part-00000"))
-
-    s3.meta.client.upload_file(partname, 'winthropcsthesis',partname + '.txt')
-
-    if os.path.isdir("/" + partname):
-        os.rmdir(partname)
-
-
-
-# header = headers.take(10)
-# for x in headers.collect():
-#     print(x)
-
-
-# headers.filter(lambda line: line != header)
-
-
-# print(headers.count())
-# for x in headers.take(10):
-#     print("FIRST\n")
-#     print(x)
-# for x in headers.take(10):
-#     print("SECOND\n")
-#     print(x)
+        shutil.rmtree(yymmstr, ignore_errors=True)

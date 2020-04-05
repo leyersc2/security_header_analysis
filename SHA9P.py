@@ -79,6 +79,8 @@ from pyspark import SparkContext
 from urlparse import urlparse
 import hashlib
 import boto3
+import os
+import os.path
 
 sc = SparkContext.getOrCreate()
 
@@ -92,21 +94,23 @@ sc = SparkContext.getOrCreate()
 #  Result:  13 INTEGERS. ONE FOR EACH HEADER.
 #----------------------------------------------------------------------------+
 
-X_XSS_Protection_FLAG = 0b100000000000
-Content_Security_Policy_FLAG = 0b010000000000
-X_Frame_Options_FLAG = 0b001000000000
-Strict_Transport_Security_FLAG = 0b000100000000
-X_Content_Type_Options_FLAG = 0b000010000000
-X_Download_Options_FLAG = 0b000001000000
-X_Permitted_Cross_Domain_Policies_FLAG = 0b000000100000
-X_Public_Key_Pins_FLAG = 0b000000010000
-X_Content_Security_Policy_FLAG = 0b000000010000
-Expect_CT_FLAG = 0b000000001000
-Feature_Policy_FLAG = 0b000000000100
-Referer_FLAG = 0b000000000010
-Referer_Policy_FLAG = 0b000000000001
+X_XSS_Protection_FLAG =                     0b100000000000000
+Content_Security_Policy_FLAG =              0b010000000000000
+X_Content_Security_Policy_FLAG =            0b001000000000000
+X_Frame_Options_FLAG =                      0b000100000000000
+Strict_Transport_Security_FLAG =            0b000010000000000
+X_Content_Type_Options_FLAG =               0b000001000000000
+X_Download_Options_FLAG =                   0b000000100000000
+X_Permitted_Cross_Domain_Policies_FLAG =    0b000000010000000
+Expect_CT_FLAG =                            0b000000001000000
+Feature_Policy_FLAG =                       0b000000000100000
+Referrer_Policy_FLAG =                      0b000000000010000
+X_Public_Key_Pins_FLAG =                    0b000000000001000
+X_Public_Key_Pins_Report_Only_FLAG =        0b000000000000100
+Public_Key_Pins_FLAG =                      0b000000000000010
+Public_Key_Pins_Report_Only_FLAG =          0b000000000000001
 
-partitions = 3
+partitions = 2
 
 
 def getHeaders (id_, iterator):
@@ -139,7 +143,7 @@ def getHeaders (id_, iterator):
                 #
                 #  Result:    DICTIONARY OBJECT REPRESENTING ONE WAT RECORD
                 #------------------------------------------------------------------------+
-                retArray = [None, 0b0000000000000]
+                retArray = [None, 0b000000000000000]
                 if(data["Envelope"]["WARC-Header-Metadata"]["WARC-Type"] == "response"):
 
                     retArray[0] = hashlib.md5(urlparse(data["Envelope"]["WARC-Header-Metadata"].get("WARC-Target-URI", "")).hostname).digest()
@@ -147,6 +151,8 @@ def getHeaders (id_, iterator):
                         retArray[1] = retArray[1] | X_XSS_Protection_FLAG
                     if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Content-Security-Policy", "") != ""):
                         retArray[1] = retArray[1] | Content_Security_Policy_FLAG
+                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Content-Security-Policy", "")!= ""):
+                        retArray[1] = retArray[1] | X_Content_Security_Policy_FLAG
                     if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Frame-Options", "") != ""):
                         retArray[1] = retArray[1] | X_Frame_Options_FLAG
                     if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Strict-Transport-Security", "")!= ""):
@@ -157,18 +163,20 @@ def getHeaders (id_, iterator):
                         retArray[1] = retArray[1] | X_Download_Options_FLAG
                     if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Permitted-Cross-Domain-Policies", "")!= ""):
                         retArray[1] = retArray[1] | X_Permitted_Cross_Domain_Policies_FLAG
-                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Public-Key-Pins", "")!= ""):
-                        retArray[1] = retArray[1] | X_Public_Key_Pins_FLAG
-                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Content-Security-Policy", "")!= ""):
-                        retArray[1] = retArray[1] | X_Content_Security_Policy_FLAG
                     if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Expect-CT", "")!= ""):
                         retArray[1] = retArray[1] | Expect_CT_FLAG
                     if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Feature-Policy", "")!= ""):
                         retArray[1] = retArray[1] | Feature_Policy_FLAG
-                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Referer", "")!= ""):
-                        retArray[1] = retArray[1] | Referer_FLAG
-                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Referer-Policy", "")!= ""):
-                        retArray[1] = retArray[1] | Referer_Policy_FLAG
+                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Referrer-Policy", "")!= ""):
+                        retArray[1] = retArray[1] | Referrer_Policy_FLAG
+                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Public-Key-Pins", "")!= ""):
+                        retArray[1] = retArray[1] | X_Public_Key_Pins_FLAG
+                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Public-Key-Pins", "")!= ""):
+                        retArray[1] = retArray[1] | X_Public_Key_Pins_Report_Only_FLAG
+                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Public-Key-Pins", "")!= ""):
+                        retArray[1] = retArray[1] | Public_Key_Pins_FLAG
+                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("X-Public-Key-Pins", "")!= ""):
+                        retArray[1] = retArray[1] | Public_Key_Pins_Report_Only_FLAG
                     yield retArray
 
             except ValueError:
@@ -196,10 +204,12 @@ headers = files.mapPartitionsWithIndex(getHeaders) \
     .reduceByKey(lambda x, y: x | y) \
     .partitionBy(partitions)
 
+month = "April2016"
+
 
 # parts = headers.partitions
 # print(headers.getNumPartitions())
-headers.saveAsTextFile("April2016-2")
+headers.saveAsTextFile(month)
 # zipped = headers.zipWithIndex()
 # first100 = zipped.filter()
 # print(zipped)
@@ -214,12 +224,19 @@ headers.saveAsTextFile("April2016-2")
 s3 = boto3.resource('s3')
 
 for x in range(0, partitions):
-    partname = 'April2016-2/part-'
+    partname = month + '/part-'
     num = format(x, '05d')
     partname = partname + num
-    #print(repr(partname))
-    #print(repr("please3/part-00000"))
+
+        #print(repr(partname))
+        #print(repr("please3/part-00000"))
+
     s3.meta.client.upload_file(partname, 'winthropcsthesis',partname + '.txt')
+
+    if os.path.isdir("/" + partname):
+        os.rmdir(partname)
+
+
 
 # header = headers.take(10)
 # for x in headers.collect():

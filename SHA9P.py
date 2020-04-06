@@ -111,7 +111,7 @@ X_Public_Key_Pins_Report_Only_FLAG =        0b000000000000100
 Public_Key_Pins_FLAG =                      0b000000000000010
 Public_Key_Pins_Report_Only_FLAG =          0b000000000000001
 
-partitions = 2
+partitions = 40
 
 def getHeaders (id_, iterator):
 
@@ -196,11 +196,12 @@ def getHeaders (id_, iterator):
 #
 #  Result:    FINAL PRODUCT, WHATEVER THAT MAY BE
 #----------------------------------------------------------------------------+
-for yy in range(15, 21):
-    for mm in range(1, 13):
+for yy in range(15, 16):
+    for mm in range(1, 4):
         yymmstr = str(yy) + "-" + str(mm).zfill(2)
+        print("processing " + yymmstr)
 
-        files = sc.textFile("paths/" + yymmstr + "wat.paths")
+        files = sc.textFile("sampledPaths/" + yymmstr + "wat.paths")
         headers = files.mapPartitionsWithIndex(getHeaders) \
             .map(lambda x: (x[0], x[1])) \
             .reduceByKey(lambda x, y: x | y) \

@@ -117,7 +117,7 @@ Access_Control_Allow_Headers_FLAG =         0b000000000000000000100
 Access_Control_Expose_Headers_FLAG =        0b000000000000000000010
 Access_Control_Max_Age_FLAG =               0b000000000000000000001
 
-partitions = 8
+partitions = 10
 
 def getHeaders (id_, iterator):
 
@@ -215,12 +215,12 @@ def getHeaders (id_, iterator):
 #
 #  Result:    FINAL PRODUCT, WHATEVER THAT MAY BE
 #----------------------------------------------------------------------------+
-for yy in range(15, 16):
-    for mm in range(1, 4):
+for yy in range(15, 21):
+    for mm in range(1, 13):
         yymmstr = str(yy) + "-" + str(mm).zfill(2)
         print("processing " + yymmstr)
 
-        files = sc.textFile("paths/" + yymmstr + "wat.paths")
+        files = sc.textFile("sampledPaths/" + yymmstr + "wat.paths")
         headers = files.mapPartitionsWithIndex(getHeaders) \
             .map(lambda x: (x[0], x[1])) \
             .reduceByKey(lambda x, y: x | y) \

@@ -95,23 +95,29 @@ sc = SparkContext.getOrCreate()
 #  Result:  13 INTEGERS. ONE FOR EACH HEADER.
 #----------------------------------------------------------------------------+
 
-X_XSS_Protection_FLAG =                     0b100000000000000
-Content_Security_Policy_FLAG =              0b010000000000000
-X_Content_Security_Policy_FLAG =            0b001000000000000
-X_Frame_Options_FLAG =                      0b000100000000000
-Strict_Transport_Security_FLAG =            0b000010000000000
-X_Content_Type_Options_FLAG =               0b000001000000000
-X_Download_Options_FLAG =                   0b000000100000000
-X_Permitted_Cross_Domain_Policies_FLAG =    0b000000010000000
-Expect_CT_FLAG =                            0b000000001000000
-Feature_Policy_FLAG =                       0b000000000100000
-Referrer_Policy_FLAG =                      0b000000000010000
-X_Public_Key_Pins_FLAG =                    0b000000000001000
-X_Public_Key_Pins_Report_Only_FLAG =        0b000000000000100
-Public_Key_Pins_FLAG =                      0b000000000000010
-Public_Key_Pins_Report_Only_FLAG =          0b000000000000001
+X_XSS_Protection_FLAG =                     0b100000000000000000000
+Content_Security_Policy_FLAG =              0b010000000000000000000
+X_Content_Security_Policy_FLAG =            0b001000000000000000000
+X_Frame_Options_FLAG =                      0b000100000000000000000
+Strict_Transport_Security_FLAG =            0b000010000000000000000
+X_Content_Type_Options_FLAG =               0b000001000000000000000
+X_Download_Options_FLAG =                   0b000000100000000000000
+X_Permitted_Cross_Domain_Policies_FLAG =    0b000000010000000000000
+Expect_CT_FLAG =                            0b000000001000000000000
+Feature_Policy_FLAG =                       0b000000000100000000000
+Referrer_Policy_FLAG =                      0b000000000010000000000
+X_Public_Key_Pins_FLAG =                    0b000000000001000000000
+X_Public_Key_Pins_Report_Only_FLAG =        0b000000000000100000000
+Public_Key_Pins_FLAG =                      0b000000000000010000000
+Public_Key_Pins_Report_Only_FLAG =          0b000000000000001000000
+Access_Control_Allow_Origin_FLAG =          0b000000000000000100000 # header 16
+Access_Control_Allow_Credentials_FLAG =     0b000000000000000010000 # header 17
+Access_Control_Allow_Methods_FLAG =         0b000000000000000001000 # header 18
+Access_Control_Allow_Headers_FLAG =         0b000000000000000000100 # header 19
+Access_Control_Expose_Headers_FLAG =        0b000000000000000000010 # header 20
+Access_Control_Max_Age_FLAG =               0b000000000000000000001 # header 21
 
-partitions = 40
+partitions = 8
 
 def getHeaders (id_, iterator):
 
@@ -121,7 +127,7 @@ def getHeaders (id_, iterator):
     for uri in iterator:
         key_ = Key(bucket,uri)
         file_ = warc.WARCFile(fileobj = GzipStreamFile(key_))
-
+        #print("URI READ: " + uri)
         for line in file_:
             try:
                 data = json.loads(line.payload.read())
@@ -141,7 +147,7 @@ def getHeaders (id_, iterator):
                 #
                 #  Result:    DICTIONARY OBJECT REPRESENTING ONE WAT RECORD
                 #------------------------------------------------------------------------+
-                retArray = [None, 0b000000000000000]
+                retArray = [None, 0b000000000000000000000]
                 if(data["Envelope"]["WARC-Header-Metadata"]["WARC-Type"] == "response"):
 
                     retArray[0] = hashlib.md5(urlparse(data["Envelope"]["WARC-Header-Metadata"].get("WARC-Target-URI", "")).hostname).digest()
@@ -175,6 +181,19 @@ def getHeaders (id_, iterator):
                         retArray[1] = retArray[1] | Public_Key_Pins_FLAG
                     if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Public-Key-Pins-Report-Only", "")!= ""):
                         retArray[1] = retArray[1] | Public_Key_Pins_Report_Only_FLAG
+                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Access-Control-Allow-Origin", "")!= ""):
+                        retArray[1] = retArray[1] | Access_Control_Allow_Origin_FLAG
+                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Access-Control-Allow-Credentials", "")!= ""):
+                        retArray[1] = retArray[1] | Access_Control_Allow_Credentials_FLAG
+                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Access-Control-Allow-Methods", "")!= ""):
+                        retArray[1] = retArray[1] | Access_Control_Allow_Methods_FLAG
+                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Access-Control-Allow-Headers", "")!= ""):
+                        retArray[1] = retArray[1] | Access_Control_Allow_Headers_FLAG
+                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Access-Control-Expose-Headers", "")!= ""):
+                        retArray[1] = retArray[1] | Access_Control_Expose_Headers_FLAG
+                    if(data["Envelope"]["Payload-Metadata"]["HTTP-Response-Metadata"]["Headers"].get("Access-Control-Max-Age", "")!= ""):
+                        retArray[1] = retArray[1] | Access_Control_Max_Age_FLAG
+
                     yield retArray
 
             except ValueError:
@@ -201,7 +220,7 @@ for yy in range(15, 16):
         yymmstr = str(yy) + "-" + str(mm).zfill(2)
         print("processing " + yymmstr)
 
-        files = sc.textFile("sampledPaths/" + yymmstr + "wat.paths")
+        files = sc.textFile("paths/" + yymmstr + "wat.paths")
         headers = files.mapPartitionsWithIndex(getHeaders) \
             .map(lambda x: (x[0], x[1])) \
             .reduceByKey(lambda x, y: x | y) \
@@ -218,6 +237,7 @@ for yy in range(15, 16):
             num = format(x, '05d')
             partname = partname + num
 
-            s3.meta.client.upload_file(partname, 'winthropcsthesis',partname + '.txt')
+            s3.meta.client.upload_file(partname, 'winthropcsthesis', "nolan/"+ partname + '.txt')
 
+        print("done processing " + yymmstr)
         shutil.rmtree(yymmstr, ignore_errors=True)

@@ -110,12 +110,12 @@ X_Public_Key_Pins_FLAG =                    0b000000000001000000000
 X_Public_Key_Pins_Report_Only_FLAG =        0b000000000000100000000
 Public_Key_Pins_FLAG =                      0b000000000000010000000
 Public_Key_Pins_Report_Only_FLAG =          0b000000000000001000000
-Access_Control_Allow_Origin_FLAG =          0b000000000000000100000 # header 16
-Access_Control_Allow_Credentials_FLAG =     0b000000000000000010000 # header 17
-Access_Control_Allow_Methods_FLAG =         0b000000000000000001000 # header 18
-Access_Control_Allow_Headers_FLAG =         0b000000000000000000100 # header 19
-Access_Control_Expose_Headers_FLAG =        0b000000000000000000010 # header 20
-Access_Control_Max_Age_FLAG =               0b000000000000000000001 # header 21
+Access_Control_Allow_Origin_FLAG =          0b000000000000000100000
+Access_Control_Allow_Credentials_FLAG =     0b000000000000000010000
+Access_Control_Allow_Methods_FLAG =         0b000000000000000001000
+Access_Control_Allow_Headers_FLAG =         0b000000000000000000100
+Access_Control_Expose_Headers_FLAG =        0b000000000000000000010
+Access_Control_Max_Age_FLAG =               0b000000000000000000001
 
 partitions = 8
 
@@ -225,8 +225,6 @@ for yy in range(15, 16):
             .map(lambda x: (x[0], x[1])) \
             .reduceByKey(lambda x, y: x | y) \
             .partitionBy(partitions)
-
-        #month = "16-04"
 
         headers.saveAsTextFile(yymmstr)
 

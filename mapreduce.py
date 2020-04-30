@@ -1,14 +1,14 @@
     # stream name: thesis-stream
     # bucket name: winthropcsthesis
     
-    # /*------------------------------------------------- parseServer.py -----
-    #  |  program name: parseServer.py
+    # /*------------------------------------------------- mapreduce.py -----
+    #  |  program name: mapreduce.py
     #  |
     #  |  Authors: Connor Leyers, Joshua Paytosh, Nolan Worthy
     #  |
-    #  |  Purpose:  Aimed at analyzing a subset of the CommonCrawl dataset to
-    #  |      assess WWW security of approximately 190 million unique hosts
-    #  |      by looking at active presence of HTTPS secuirty Headers across
+    #  |  Purpose:  Aimed at analyzing a sample of the CommonCrawl dataset to
+    #  |      assess security of hosts in 10 WAT files per month by
+    #  |      looking at active presence of HTTPS secuirty Headers across
     #  |      multiple months in a crawled year.
     #  |
     #  |      This is done by sampling the data via an AWS S3 Bucket and
@@ -27,7 +27,7 @@
     #  |      CommonCrawl WAT Files (IN) -- Contains JSON formatted metadata
     #  |        containing components desired for analysis on unique hosts
     #  |
-    #  |  Returns: TBD
+    #  |  Result: Sends 
     #  *-------------------------------------------------------------------*/
 
 

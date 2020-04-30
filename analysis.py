@@ -65,12 +65,12 @@ for yy in range(15, 21):
             head20_ct = 0 # Access-Control-Expose-Headers
             head21_ct = 0 # Access-Control-Max-Age
 
-            # loop through input files (starts at zero, one for every partition)
+            # loop through input files for current month (starts at zero, one for every partition)
             for x in range(0, 10):
                 x = format(x, '05d')
                 keystring = "nolan/" + yymmstr + "/part-" + str(x) + ".txt"
 
-                # if current file doesn't exist in bucket, skip this month
+                # if the file we're looking for doesn't exist in bucket, skip this month
                 try:
                     obj = s3.get_object(Bucket='winthropcsthesis', Key=keystring)
                 except:

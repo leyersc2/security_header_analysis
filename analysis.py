@@ -1,11 +1,23 @@
+ # /*----------------------------- analysis.py -------------------------
+ #  |   program name: analysis.py
+ #  |
+ #  |   Authors: Connor Leyers, Joshua Paytosh, Nolan Worthy
+ #  |
+ #  |   Purpose:  Analyzing output of mapreduce.py as retrieved from
+ #  |       S3. For every month, counts total number of records (hosts)
+ #  |       and number of records containing each header.
+ #  |
+ #  |  Result: .txt file
+ #  *-------------------------------------------------------------------*/
+
 from __future__ import division
 import boto3
 import codecs
 import sys
 import os
 
-# connect to our s3 bucket
-s3 = boto3.client('s3', aws_access_key_id='AKIAWA4MMFIPT4Y73DD5', aws_secret_access_key='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')
+# connect to our s3 bucket (supply access key and secret key)
+s3 = boto3.client('s3', aws_access_key_id='', aws_secret_access_key='')
 
 # binary flags for headers
 X_XSS_Protection_FLAG =                     0b100000000000000000000 # header 1

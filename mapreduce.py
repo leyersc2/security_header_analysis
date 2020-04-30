@@ -2,19 +2,19 @@
     # bucket name: winthropcsthesis
     
     # /*------------------------------------------------- mapreduce.py -----
-    #  |  program name: mapreduce.py
+    #  |    program name: mapreduce.py
     #  |
-    #  |  Authors: Connor Leyers, Joshua Paytosh, Nolan Worthy
+    #  |    Authors: Connor Leyers, Joshua Paytosh, Nolan Worthy
     #  |
-    #  |  Purpose:  Aimed at analyzing a sample of the CommonCrawl dataset to
-    #  |      assess security of hosts in 10 WAT files per month by
-    #  |      looking at active presence of HTTPS secuirty Headers across
-    #  |      multiple months in a crawled year.
+    #  |    Purpose:  Performs MapReduce on a sample of the Common Crawl
+    #  |      dataset to assess security of hosts across the internet by
+    #  |      determining presence of HTTPS security response headers
+    #  |      across multiple months.
     #  |
-    #  |      This is done by sampling the data via an AWS S3 Bucket and
-    #  |      utilizing an Elastic Map Reduce (EMR) cluster to partition
-    #  |      and optimize the large scale computation required for this
-    #  |      analysis.
+    #  |      This is done by retrieving the data from the Common Crawl
+    #  |      AWS S3 Bucket and utilizing an Elastic Map Reduce (EMR) cluster
+    #  |      to partition and optimize the large scale computation required
+    #  |      for this analysis.
     #  |
     #  |  Parameters:
     #  |             ***IN = USED TO PASS DATA INTO THIS FUNCTION
@@ -27,7 +27,7 @@
     #  |      CommonCrawl WAT Files (IN) -- Contains JSON formatted metadata
     #  |        containing components desired for analysis on unique hosts
     #  |
-    #  |  Result: Sends 
+    #  |  Result: Sends .txt to winthropcsthesis S3 bucket
     #  *-------------------------------------------------------------------*/
 
 
@@ -92,7 +92,7 @@ sc = SparkContext.getOrCreate()
 #
 #  Parameters:  NONE
 #
-#  Result:  13 INTEGERS. ONE FOR EACH HEADER.
+#  Result:  21 INTEGERS. ONE FOR EACH HEADER.
 #----------------------------------------------------------------------------+
 
 X_XSS_Protection_FLAG =                     0b100000000000000000000
@@ -127,7 +127,7 @@ def getHeaders (id_, iterator):
     for uri in iterator:
         key_ = Key(bucket,uri)
         file_ = warc.WARCFile(fileobj = GzipStreamFile(key_))
-        #print("URI READ: " + uri)
+        
         for line in file_:
             try:
                 data = json.loads(line.payload.read())
@@ -204,17 +204,18 @@ def getHeaders (id_, iterator):
                 continue
 
 #------------------------ MAPREDUCE AND OUTPUT ------------------------------+
-#  Purpose:   PERFORM MAPREDUCE ON DICTIONARY OBJECTS AND OUTPUT AS TBD
+#  Purpose:   PERFORM MAPREDUCE ON DICTIONARY OBJECTS AND OUTPUT AS TXT FILE
 #       -MAP STEP: CREATE KEY-VALUE PAIR FROM DICTIONARY ELEMENTS
 #       -REDUCE STEP: REDUCE RECORDS WHERE HOSTNAMES MATCH INTO
 #        SINGLE RECORD BY PERFORMING BITWISE-OR ON HEADER BITS
-#       -OUTPUT STEP:
+#       -OUTPUT STEP: SAVE AS TXT FILE, SEND TO S3, DELETE LOCAL COPY
 #
 #  Parameters:
 #     -files: FILE CONTAINING PATHS OF WAT FILES WITHIN S3 BUCKET
 #
 #  Result:    FINAL PRODUCT, WHATEVER THAT MAY BE
 #----------------------------------------------------------------------------+
+# loop by year, and by month within each year
 for yy in range(15, 21):
     for mm in range(1, 13):
         yymmstr = str(yy) + "-" + str(mm).zfill(2)
@@ -230,6 +231,7 @@ for yy in range(15, 21):
 
         s3 = boto3.resource('s3')
 
+        #   upload to S3
         for x in range(0, partitions):
             partname = yymmstr + '/part-'
             num = format(x, '05d')
@@ -238,4 +240,6 @@ for yy in range(15, 21):
             s3.meta.client.upload_file(partname, 'winthropcsthesis', "nolan/"+ partname + '.txt')
 
         print("done processing " + yymmstr)
+        
+        # delete local folder for current month
         shutil.rmtree(yymmstr, ignore_errors=True)
